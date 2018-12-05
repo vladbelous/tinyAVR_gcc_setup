@@ -11,7 +11,7 @@ With obivous modifications (in AVR-Libc section), this should *probably* work wi
 * attiny1614, attiny1616, attiny1617,
 * attiny3214, attiny3216, attiny3217.
 
-# AVR GCC cross compilation + avrdude toolchain:
+# AVR GCC cross compilation + avrdude toolchain
 Start by chosing the installation destination.
 
 Used only during build/install:
@@ -48,7 +48,7 @@ make
 sudo make install
 ```
 
-## AVR-Libc
+## AVR-Libc:
 Download (http://download.savannah.gnu.org/releases/avr-libc/),
 unpack and enter into directory, then:
 
@@ -64,7 +64,7 @@ only under the new custom $PATH, which is (by default) not passed by sudo.
 At this point you should be able to use avr-gcc toolchain for older MCUs like attiny85, attiny841, atmega328p, etc.
 Next sections are for the newer tinyAVR 1-series.
 
-### Atmel/Microchip ATtiny_DFP Pack
+### Atmel/Microchip ATtiny_DFP Pack:
 Microchip does not make it easy. Instead of them simply providing a full avr-libc to build, we have to hack things together.
 Hopefully "upstream" avr-libc will soon support tinyAVR 1-series (like attiny1614), and this could be skipped.
 
@@ -89,7 +89,7 @@ find $PREFIX -iname '*841*'
 find $PREFIX -iname '*1614*'
 ```
 
-### Atmel/Microchip libm/libc
+### Atmel/Microchip libm/libc:
 We also need avrxmega3-compatible libc.a and libm.a (avr-libc 2.0.0 does not have it).
 
 Get Atmel/Microchip "avr8-gnu-toolchain-..."
@@ -109,19 +109,7 @@ being present in Atmel/Microchip's, but not "vanilla" GCC.
 Test if memory-mapped flash actually works.
 
 
-## avrdude (not tested)
-Download, unpack and enter into directory, then:
-```
-mkdir avr-obj
-cd avr-obj
-../configure --prefix=$PREFIX
-
-make
-sudo make install
-```
-
-# Example of usage
-
+## Example of compiler usage:
 Compile and link:
 ```
 avr-gcc -c -Os -mmcu=attiny1614 main.cpp
@@ -143,5 +131,36 @@ Create hex for uploading (e.g. with avrdude):
 avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 ```
 
-# TODO: firmware uploading
-avrdude and jtag2updi stuff...
+# avrdude
+Note: avrdude build/installation requires presence of `yacc` and `lex` binaries, but the configure script doesn't seem to correctly check for that. In case of Ubuntu, you can get these from following packages:
+```
+sudo apt-get install bison flex
+```
+
+Download avrdude (http://download.savannah.gnu.org/releases/avrdude/), unpack and enter into directory, then:
+```
+mkdir avr-obj
+cd avr-obj
+../configure --prefix=$PREFIX
+
+make
+sudo make install
+```
+
+## TODO: section on jtag2updi:
+TODO
+
+## Example of uploading firmware:
+Assuming you've produced `main.hex` as described above, you can use avrdude with following script:
+```
+#!/bin/bash
+
+# Adjust these as needed:
+AVRDUDE_CONF_WITH_JTAG2UPDI=avrdude.conf
+MCU=t1614
+PORT=/dev/ttyUSB0
+
+avrdude -v -C $AVRDUDE_CONF_WITH_JTAG2UPDI -c jtag2updi \
+    -P $PORT -p $MCU \
+    -U flash:w:main.hex:i
+```
