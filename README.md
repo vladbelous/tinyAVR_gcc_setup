@@ -126,9 +126,9 @@ If you want to check disassembled output:
 avr-objdump -S main.elf > main.asm
 ```
 
-Create hex for uploading (e.g. with avrdude):
+Create ihex file for uploading (e.g. with avrdude):
 ```
-avr-objcopy -j .text -j .data -O ihex main.elf main.hex
+avr-objcopy -j .text -j .data -j .rodata -O ihex main.elf main.hex
 ```
 
 # avrdude
