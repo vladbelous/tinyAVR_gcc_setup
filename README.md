@@ -11,6 +11,18 @@ With obivous modifications (in AVR-Libc section), this should *probably* work wi
 * attiny1614, attiny1616, attiny1617,
 * attiny3214, attiny3216, attiny3217.
 
+# Summary:
+* Compilation/build toolchain:
+  * Binutils
+  * GCC: recent upstream GCC already supports the new MCUs (and avrxmega3 architecture)
+  * AVR-Libc: upstream version (as of 2.0.0) does *not* have support for avrxmega3, so we need to hack things a bit:
+    * We need 2 extra avrxmega3-specific files: `libm.a` and `libc.a`,
+    * Also 3 extra MCU-specific files, e.g. for attiny1614: `libattiny1614.a`, `crtattiny1614.o`, `iotn1614.h`.
+* Uploading firmare:
+  * `avrdude` with a modified config file containing descriptions of the new AVR parts and jtag2updi protocol. 
+  * Setup another AVR (e.g. an Arduino Uno board) as the programmer using El Tanga's firmware implementing jtag2updi.
+
+
 # AVR GCC cross compilation + avrdude toolchain
 Start by chosing the installation destination.
 
