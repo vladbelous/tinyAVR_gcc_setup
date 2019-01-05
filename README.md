@@ -20,7 +20,7 @@ With obivous modifications (in AVR-Libc section), this should *probably* work wi
     * Also 3 extra MCU-specific files, e.g. for attiny1614: `libattiny1614.a`, `crtattiny1614.o`, `iotn1614.h`.
 * Uploading firmare:
   * `avrdude` with a modified config file containing descriptions of the new AVR parts and jtag2updi protocol. 
-  * Setup another AVR (e.g. an Arduino Uno board) as the programmer using El Tanga's firmware implementing jtag2updi.
+  * Setup another AVR (e.g. an Arduino Uno board) as the programmer using firmware by El Tangas implementing jtag2updi.
 
 
 # AVR GCC cross compilation + avrdude toolchain
