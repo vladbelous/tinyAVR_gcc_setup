@@ -72,10 +72,10 @@ Get Atmel/Microchip ATtiny_DFP Pack (try http://packs.download.atmel.com/)
 It is called something like "Atmel.ATtiny_DFP.1.3.229.atpack". It's really just a zip archive with .atpack extention.
 
 Unpack and enter into directory, then we must copy the following
-files from Atmel pack:
-gcc/dev/attiny1614/avrxmega3/libattiny1614.a,
-gcc/dev/attiny1614/avrxmega3/crtattiny1614.o,
-include/avr/iotn1614.h:
+3 files from Atmel pack:
+- gcc/dev/attiny1614/avrxmega3/libattiny1614.a,
+- gcc/dev/attiny1614/avrxmega3/crtattiny1614.o,
+- include/avr/iotn1614.h:
 ```
 sudo mkdir $PREFIX/avr/lib/avrxmega3
 sudo cp gcc/dev/attiny1614/avrxmega3/libattiny1614.a $PREFIX/avr/lib/avrxmega3/
@@ -83,10 +83,12 @@ sudo cp gcc/dev/attiny1614/avrxmega3/crtattiny1614.o $PREFIX/avr/lib/avrxmega3/
 sudo cp include/avr/iotn1614.h $PREFIX/avr/include/avr/
 ```
 
-You should see similar structure with other (supported) micros, e.g. compare:
+*Note*: Obviously, if you are using a part other than attiny1614, adjust file names accordingly.
+
+You should see file structure similar to that of other (supported) MCUs, e.g. compare outputs of:
 ```
-find $PREFIX -iname '*841*'
-find $PREFIX -iname '*1614*'
+find $PREFIX -iname '*841*'   # support files for attiny841
+find $PREFIX -iname '*1614*'  # support files for the new attiny1614
 ```
 
 ### Atmel/Microchip libm/libc:
@@ -100,7 +102,7 @@ sudo cp avr/lib/avrxmega3/libc.a $PREFIX/avr/lib/avrxmega3/
 ```
 
 ### TODO
-TODO: Check differences in device-specs/specs-attiny1614 between "vanilla" GCC
+There are some differences in device-specs/specs-attiny1614 between "vanilla" GCC
 and Atmel/Microchip toolchains, specifically wrt
 ```
  --defsym=__RODATA_PM_OFFSET__=0x8000
@@ -108,6 +110,8 @@ and Atmel/Microchip toolchains, specifically wrt
 being present in Atmel/Microchip's, but not "vanilla" GCC.
 Test if memory-mapped flash actually works.
 
+*Update*: It appears there's no issue with GCC's device-spec. I confirmed the compiler can choose to put constant global objects into flash memory (without needing to specify PROGMEM, etc), and generated code can access it fine with `ld` instructions (instead of `lpm`).
+No special considerations needed, except making sure that `-j .rodata` is supplied to `avr-objcopy` command (which ensures the relevant section of the elf file is included in the final ihex firmware file).
 
 ## Example of compiler usage:
 Compile and link:
@@ -147,8 +151,18 @@ make
 sudo make install
 ```
 
-## TODO: section on jtag2updi:
-TODO
+## Using UPDI with jtag2updi:
+The new AVRs (tinyAVR 0-series, tinyAVR 1-series, megaAVR 0-series) use a new protocol of uploading firmware - UPDI.
+
+Some official programmer from Atmel/Microchip with UPDI support should work fine, but we can also have a setup where we use **another AVR as the programmer**, i.e. similar to how "Arduino as ISP" is commonly used for programming (old) attiny parts.
+
+Thanks to the work of El Tangas and others, we have such firmware which, if uploaded to atmega328p (or similar) based board (e.g. Arduino Uno, Arduino Pro Mini, or even bare atmega328p, etc), will make it act as a UPDI programmer.
+
+More details and wiring diagram: https://github.com/ElTangas/jtag2updi. In my case just uploading the pre-built `build/JTAG2UPDI.hex` to an Arduino Pro Mini was sufficient.
+
+As of version 6.3 upstream avrdude does *not* yet support UPDI, but (again thanks to the work of El Tangas and others), all we need is a modified `avrdude.conf` file: https://github.com/ElTangas/jtag2updi/blob/master/avrdude.conf -- it adds the necessary entries for the new AVR parts and jtag2updi programmer protocol description to comminucate with your "Arduino as UPDI-programmer".
+
+You do not need to override you "official" `avrdude.conf` file, since you can always specify a custom `.conf` path with `-c` flag (see example below).
 
 ## Example of uploading firmware:
 Assuming you've produced `main.hex` as described above, you can use avrdude with following script:
