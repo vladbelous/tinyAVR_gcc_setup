@@ -51,6 +51,11 @@ Note: here an onwards, `sudo` is only needed because of /usr/local/... destinati
 ## GCC:
 Download (www.gnu.org/software/gcc/), unpack and enter into directory, then:
 ```
+# You may need to manually download GCC's prerequisites:
+# (run this from top-level gcc build directory)
+./contrib/download_prerequisites
+
+# Continue to build:
 mkdir avr-obj
 cd avr-obj
 ../configure --prefix=$PREFIX --target=avr --enable-languages=c,c++ \
